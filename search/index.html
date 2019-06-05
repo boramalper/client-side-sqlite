@@ -55,7 +55,7 @@
         </form>
     </center>
 
-    <span>Loading... In the meanwhile, open the Console and check the requests!</span>
+    <span>Loading... In the meanwhile, open the console and check the network activity!</span>
 
     <ul>
     </ul>
@@ -63,11 +63,19 @@
     <script>
         let worker = null;
 
+        function toggleLoading() {
+            let span = document.querySelector("span")
+            span.style.display = span.style.display == "none" ? "" : "none"
+        }
+
         function search(query, type) {
             document.querySelector("ul").innerHTML = "";
+            toggleLoading()
 
             if (type === "story") {
                 worker.onmessage = (event) => {
+                    toggleLoading();
+
                     if (event.data.results.length === 0)
                         return alert("No results found!")
 
@@ -104,6 +112,8 @@
                 `})
             } else {
                 worker.onmessage = (event) => {
+                    toggleLoading()
+
                     if (event.data.results.length === 0)
                         return alert("No results found!")
 
