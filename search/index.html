@@ -1,0 +1,117 @@
+<html>
+<head>
+    <title>HN Search</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+
+        body {
+            max-width: 50vw;
+            margin: 5px auto;
+
+        }
+
+        h1 {
+            margin-bottom: 0;
+        }
+
+        center {
+            margin-top: 1em;
+        }
+
+        input {
+            width: 80%;
+        }
+
+        li {
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1><a href="/">HN Search</a></h1>
+    <i>A demo of <b>client-side SQLite</b> for the web.</i>
+
+    <center>
+        <form action="#" onsubmit="return submit()">
+            <input type="search" name="query" placeholder="Search">
+            <select name="type">
+                <option value="story">Stories</option>
+                <option value="comment">Comments</option>
+            </select>
+        </form>
+    </center>
+
+    <span>Loading... In the meanwhile, open the Console and check the requests!</span>
+
+    <ul>
+    </ul>
+
+    <script>
+        function search(query, type) {
+            document.querySelector("ul").innerHTML = "";
+
+            if (type === "story") {
+                worker.onmessage = (event) => {
+                    console.log(">>>", event.data.results)
+
+                    console.log(event.data.results[0].values)
+
+                    for (let x of event.data.results[0].values) {
+                        // id,   title, url?, text?
+                        // x[0], x[1],  x[2], x[3]
+
+                        urlOrText = x[2] != null ? x[2] /* url */ : x[3] /* text */;
+
+                        document.querySelector("ul").innerHTML += `<li>
+                            <b><a href="https://news.ycombinator.com/item?id=${x[0]}">${x[1]}</a></b><br />
+                            <small>${urlOrText}</small>
+                            </li>`
+                    }
+
+                }
+
+                query = query.replace(/\'/g, "''")
+                worker.postMessage({
+                    action: "exec",
+                    sql: `
+                    SELECT
+                        docid,
+                        snippet(story_fts, "<mark>", "</mark>", "...", 0), -- title
+                        snippet(story_fts, "<mark>", "</mark>", "...", 1), -- url
+                        snippet(story_fts, "<mark>", "</mark>", "...", 2)  -- text
+                    FROM story_fts
+                    INNER JOIN story ON (docid = story.id)
+                    WHERE story_fts MATCH '${query}'
+                    LIMIT 50 OFFSET 0;`
+                })
+            } else {
+
+            }
+        }
+
+        function submit(x) {
+            console.log(x)
+
+            search(searchParams.get("query"), searchParams.get("type"))
+
+            return false
+        }
+
+        let worker = new Worker("/sql.js/worker.sql-wasm-debug.js")
+        worker.onerror = (e) => console.error(e)
+
+        worker.onmessage = () => {
+            let url = new URL(window.location)
+            let searchParams = new URLSearchParams(url.search)
+
+            search(searchParams.get("query"), searchParams.get("type"))
+        }
+        worker.postMessage({ action: "open", url: "http://142.93.32.59:8081/hn.sqlite3" })
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<html>
+<head>
+    <title>HN Search</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+
+        body {
+            max-width: 50vw;
+            margin: 5px auto;
+
+        }
+
+        h1 {
+            margin-bottom: 0;
+        }
+
+        center {
+            margin-top: 1em;
+        }
+
+        input {
+            width: 80%;
+        }
+
+        tt {
+            font-family: monospace, monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HN Search</h1>
+    <i>A demo of <b>client-side SQLite</b> for the web.</i>
+
+    <center>
+        <form action="/search" method="GET">
+            <input type="search" name="query" placeholder="Search">
+            <select name="type">
+                <option value="story">Stories</option>
+                <option value="comment">Comments</option>
+            </select>
+        </form>
+    </center>
+
+    <h2>What is <q>client-side SQLite</q>?</h2>
+    <p>It began with a seemingly-simple question: <q>How can I query my database
+    without having to run a database server on my server?</q></p>
+
+    <p>The most straightforward answer to the question is to make clients
+    download the whole database and query it, which becomes impractical as the
+    database grows.</p>
+
+    <p>My solution is, using <a href="https://github.com/kripken/sql.js">sql.js</a>
+    (SQLite compiled to JavaScript through Emscripten), <i>download the database as
+    the database file is accessed</i>. Laziness is achieved by HTTP Range requests.</p>
+
+
+    <h2>Neat, but what else?</h2>
+    <p>I think the real significance of this project is how it reduces the
+    cost of running a service that requires a database. Given the prevalence of
+    free static file hosting services (<i>e.g.</i> GitHub pages, Netlify), the
+    need for renting a server for the database server is eliminated.</p>
+
+    <p>Decentralised networks such as IPFS can also benefit from client-side
+    databases for the same reasons stated above. "Client"-side database access
+    fits closer to the peer-to-peer toppology of such networks as opposed to a
+    client-server model of the (traditional) Web.</p>
+
+    <h2>When is this a bad idea?</h2>
+    <p>While the solution presented here is much more efficient (in terms of
+    data transfer) than pushing the whole database to the clients, it is still
+    significantly less efficient than returning the results of a query only.
+    Though it must be noted that subsequent queries often do not need more to be
+    downloaded so on average it shall compensate.</p>
+
+    <p>File system access will still be faster, so if your intended use case
+    is to retrieve rows by their <em>unique</em> identifiers, you might want to consider
+    using a directory structure where files are identified by the information
+    embedded in their path.</p>
+
+    <p>sql.js is still not mature enough to be fully reliable, so its use is
+    discouraged for critical services. You might also encounter problems with
+    large databases (> 1 GiB, approximately) for reasons currently unknown.
+    </p>
+
+    <p>Lastly, this offers a read-only access to the database so modifications
+    would not be possible.</p>
+
+    <h2>How can I use this?</h2>
+    <p>TODO</p>
+
+    <h2>Who did this?</h2>
+    <p><b>Bora M. Alper</b>, me, a computer science student in
+    <a href="https://www.inf.ed.ac.uk/">The University of Edinburgh</a>.
+    Developed in <a href="https://en.wikipedia.org/wiki/Bodrum">Bodrum</a> using
+    the excess sunlight.</p>
+
+    <p>Also see my GitHub: <a href="https://github.com/boramalper/">https://github.com/boramalper</a></p>
+</body>
+</html>
