@@ -42,7 +42,7 @@
 </head>
 
 <body>
-    <h1><a href="/">HN Search</a></h1>
+    <h1><a href="../">HN Search</a></h1>
     <i>A demo of <b>client-side SQLite</b> for the web.</i>
 
     <center>
@@ -157,6 +157,8 @@
             let type = ((s) => s[s.selectedIndex].value)(document.querySelector('select'))
 
             console.log("New search", type, query)
+
+            window.history.pushState({}, null, `./?query=${encodeURIComponent(query)}&type=${encodeURIComponent(type)}`);
 
             search(query, type)
 
