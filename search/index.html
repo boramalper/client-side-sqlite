@@ -153,7 +153,7 @@
             return false
         }
 
-        worker = new Worker("/sql.js/worker.sql-wasm-debug.js")
+        worker = new Worker("../sql.js/worker.sql-wasm-debug.js")
         worker.onerror = (e) => console.error(e)
 
         worker.onmessage = () => {
