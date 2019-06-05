@@ -8,10 +8,18 @@
             font-family: sans-serif;
         }
 
-        body {
-            max-width: 50vw;
-            margin: 5px auto;
+        @media only screen and (min-width: 1024px) {
+            body {
+                max-width: 50vw;
+                margin: 5px auto;
+            }
+        }
 
+        @media only screen and (max-width: 1024px) {
+            body {
+                max-width: 90vw;
+                margin: 5px auto;
+            }
         }
 
         h1 {
@@ -37,7 +45,7 @@
     <i>A demo of <b>client-side SQLite</b> for the web.</i>
 
     <center>
-        <form action="/search" method="GET">
+        <form action="./search" method="GET">
             <input type="search" name="query" placeholder="Search">
             <select name="type">
                 <option value="story">Stories</option>
