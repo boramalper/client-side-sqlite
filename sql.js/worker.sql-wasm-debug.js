@@ -7179,6 +7179,13 @@ if (typeof importScripts === 'function') {
           } else {
             createDb(void 0);
           }
+          // BORA added this
+          // BORA: simply counts the number of occurences (to order results in
+          // DESC order later on)
+          db.create_function("countintegers", function(text) {
+            return (text.match(/ /g)||[]).length
+          });
+
           return postMessage({
             'id': data['id'],
             'ready': true

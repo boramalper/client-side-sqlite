@@ -37,9 +37,9 @@
     <i>A demo of <b>client-side SQLite</b> for the web.</i>
 
     <center>
-        <form action="#" onsubmit="return submit()">
+        <form action="#" onsubmit="return ma_submit()">
             <input type="search" name="query" placeholder="Search">
-            <select name="type">
+            <select name="type" onchange="ma_submit()">
                 <option value="story">Stories</option>
                 <option value="comment">Comments</option>
             </select>
@@ -52,14 +52,17 @@
     </ul>
 
     <script>
+        let worker = null;
+
         function search(query, type) {
             document.querySelector("ul").innerHTML = "";
 
             if (type === "story") {
                 worker.onmessage = (event) => {
-                    console.log(">>>", event.data.results)
+                    if (event.data.results.length === 0)
+                        return alert("No results found!")
 
-                    console.log(event.data.results[0].values)
+                    console.log(event.data.results[0])
 
                     for (let x of event.data.results[0].values) {
                         // id,   title, url?, text?
@@ -81,28 +84,67 @@
                     sql: `
                     SELECT
                         docid,
-                        snippet(story_fts, "<mark>", "</mark>", "...", 0), -- title
-                        snippet(story_fts, "<mark>", "</mark>", "...", 1), -- url
-                        snippet(story_fts, "<mark>", "</mark>", "...", 2)  -- text
+                        snippet(story_fts, "<mark>", "</mark>", "...", 0) AS title,
+                        snippet(story_fts, "<mark>", "</mark>", "...", 1) AS url,
+                        snippet(story_fts, "<mark>", "</mark>", "...", 2) AS text
                     FROM story_fts
-                    INNER JOIN story ON (docid = story.id)
                     WHERE story_fts MATCH '${query}'
-                    LIMIT 50 OFFSET 0;`
-                })
+                    -- Disabled as it increases the disk access a lot!
+                    -- ORDER BY countintegers(offsets(story_fts)) DESC
+                    LIMIT 20;
+                `})
             } else {
+                worker.onmessage = (event) => {
+                    if (event.data.results.length === 0)
+                        return alert("No results found!")
 
+                    console.log(event.data.results[0])
+
+                    for (let x of event.data.results[0].values) {
+                        // id,   text
+                        // x[0], x[1]
+
+                        document.querySelector("ul").innerHTML += `<li>
+                            <b><a href="https://news.ycombinator.com/item?id=${x[0]}">${x[1]}</a></b><br />
+                            <small>${x[2]}</small>
+                            </li>`
+                    }
+
+                }
+
+                query = query.replace(/\'/g, "''")
+                worker.postMessage({
+                    action: "exec",
+                    sql: `
+                    SELECT
+                        docid,
+                        story.title,
+                        snippet(comment_fts, "<mark>", "</mark>", "...", 0, 64)
+                    FROM comment_fts
+                    INNER JOIN comment
+                        ON (docid = comment.id)
+                    INNER JOIN story
+                        ON (comment.story_id = story.id)
+                    WHERE comment_fts MATCH '${query}'
+                    -- Disabled as it increases the disk access a lot!
+                    -- ORDER BY countintegers(offsets(comment_fts)) DESC
+                    LIMIT 20
+                `})
             }
         }
 
-        function submit(x) {
-            console.log(x)
+        function ma_submit(x) {
+            let query = document.querySelector('input[type="search"]').value
+            let type = ((s) => s[s.selectedIndex].value)(document.querySelector('select'))
 
-            search(searchParams.get("query"), searchParams.get("type"))
+            console.log("New search", type, query)
+
+            search(query, type)
 
             return false
         }
 
-        let worker = new Worker("/sql.js/worker.sql-wasm-debug.js")
+        worker = new Worker("/sql.js/worker.sql-wasm-debug.js")
         worker.onerror = (e) => console.error(e)
 
         worker.onmessage = () => {

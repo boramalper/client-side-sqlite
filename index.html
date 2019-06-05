@@ -79,8 +79,8 @@
 
     <p>File system access will still be faster, so if your intended use case
     is to retrieve rows by their <em>unique</em> identifiers, you might want to consider
-    using a directory structure where files are identified by the information
-    embedded in their path.</p>
+    using a directory structure where rows are represented as files and are
+    identified by the information embedded in their path.</p>
 
     <p>sql.js is still not mature enough to be fully reliable, so its use is
     discouraged for critical services. You might also encounter problems with
@@ -91,7 +91,18 @@
     would not be possible.</p>
 
     <h2>How can I use this?</h2>
-    <p>TODO</p>
+    <p>I've already submitted a PR! =) See <a href="https://github.com/kripken/sql.js/pull/278"><tt>kripken/sql.js#278</tt></a>.
+        Also feel free to take a peek at the <a href="https://github.com/boramalper/client-side-sqlite">source code</a> of this.</p>
+
+    <h3>Some Tips</h3>
+    <ul>
+        <li>Bigger <a href="https://www.sqlite.org/pragma.html#pragma_page_size">page sizes</a> seem to result in faster queries.</li>
+        <li>Make sure to <a href="https://www.sqlite.org/fts3.html#*fts4optcmd">optimize your FTS tables</a> and <tt>VACUUM</tt> your database at the end.</li>
+        <li><tt>Content-Encoding: gzip</tt> won't work (<a href="https://github.com/emscripten-core/emscripten/blob/55ad1c4502293cc0f6ce8d5a249c941eee604269/src/library_fs.js#L1752">see</a>), but might want to try setting <tt>Transfer-Encoding: gzip</tt> (though it seems not as widely used as <tt>Content-Encoding</tt> so beware compatibility issues.)</li>
+        <li>Understand the trade-off well: you are lowering your setup complexity &amp; costs at the expense of increased bandwidth consumption (which affects both you and your visitors/users).</li>
+    </ul>
+
+    <p>Feel free to contact me if you need further help: <tt>bora et boramalper dot org</tt>
 
     <h2>Who did this?</h2>
     <p><b>Bora M. Alper</b>, me, a computer science student in
